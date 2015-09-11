@@ -26,7 +26,7 @@ class ConversionTestSuite extends TestCase
 		var a : ToDecorate = new ToDecorate();
 		
 		assertEquals(1, a.annotations.length);
-		//assertTrue(Reflect.hasField(a.annotations[0], "one"));
-		//assertEquals(1, Reflect.field(a.annotations[0], "one"));
+		assertTrue(Reflect.hasField(a.annotations[0], "one"));
+		assertEquals(1, Reflect.field(a.annotations[0], "one"));
 	}
 }
