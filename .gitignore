@@ -1,3 +1,7 @@
+# Project Ignores
+bin/hxdecorate.js
+bin/hxdecorate.js.map
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
