@@ -13,25 +13,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package;
+package libraryTest;
 
-import haxe.unit.TestRunner;
-import hxdecorate.Decorator;
-import libraryTest.ConversionTestSuite;
+import haxe.unit.TestCase;
+import libraryTest.ToDecorate;
+import libraryTest.TestDecorators;
 
-@:build(hxdecorate.Decorator.build({
-	'DecoratorOne' : 'libraryTest.TestDecorators.decoratorOne',
-	'DecoratorTwo' : 'libraryTest.TestDecorators.decoratorTwo'
-}, [
-	"libraryTest.ToDecorate"
-]))
-class Main 
-{	
-	static function main() 
+class ConversionTestSuite extends TestCase
+{
+	public function testConversion()
 	{
-		var runner : TestRunner = new TestRunner();
-		runner.add(new ConversionTestSuite());
+		var a : ToDecorate = new ToDecorate();
 		
-		runner.run();
+		assertEquals(1, a.annotations.length);
+		//assertTrue(Reflect.hasField(a.annotations[0], "one"));
+		//assertEquals(1, Reflect.field(a.annotations[0], "one"));
 	}
 }

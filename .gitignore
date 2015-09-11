@@ -1,6 +1,5 @@
 # Project Ignores
-bin/hxdecorate.js
-bin/hxdecorate.js.map
+bin/
 
 # Windows image file caches
 Thumbs.db

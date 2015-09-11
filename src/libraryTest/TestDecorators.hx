@@ -13,25 +13,28 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package;
+package libraryTest;
 
-import haxe.unit.TestRunner;
-import hxdecorate.Decorator;
-import libraryTest.ConversionTestSuite;
+import libraryTest.ToDecorate;
 
-@:build(hxdecorate.Decorator.build({
-	'DecoratorOne' : 'libraryTest.TestDecorators.decoratorOne',
-	'DecoratorTwo' : 'libraryTest.TestDecorators.decoratorTwo'
-}, [
-	"libraryTest.ToDecorate"
-]))
-class Main 
-{	
-	static function main() 
+@:keep
+@:expose
+class TestDecorators
+{
+	private function new() 
 	{
-		var runner : TestRunner = new TestRunner();
-		runner.add(new ConversionTestSuite());
 		
-		runner.run();
+	}
+	
+	public static function decoratorOne(input : Dynamic, caller : ToDecorate) : ToDecorate
+	{
+		caller.annotations.push(input);
+		return caller;
+	}
+	
+	public static function decoratorTwo(input : Dynamic, caller : ToDecorate) : ToDecorate
+	{
+		caller.parameters.push(input);
+		return caller;
 	}
 }
