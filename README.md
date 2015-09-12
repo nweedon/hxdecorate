@@ -14,14 +14,15 @@ __Notes:__
 
 __Supported Platforms:__
 * JavaScript
+* Python
 
 __Use:__
 Place on main class.
 
 *Syntax:*
-```
+```haxe
 @:build(hxdecorate.Decorator.build({
-  decorator_name : path_to_static_function,
+  decorator_name : path_to_static_function#functionName,
   ...
 },
 [
@@ -30,10 +31,10 @@ Place on main class.
 ```
 
 *Example:*
-```
+```haxe
 @:build(hxdecorate.Decorator.build({
-	'DecoratorOne' : 'libraryTest.TestDecorators.decoratorOne',
-	'DecoratorTwo' : 'libraryTest.TestDecorators.decoratorTwo'
+	'DecoratorOne' : 'libraryTest.TestDecorators#decoratorOne',
+	'DecoratorTwo' : 'libraryTest.TestDecorators#decoratorTwo'
 }, [
 	"libraryTest.ToDecorate"
 ]))
@@ -43,4 +44,32 @@ class Main
 }
 ```
 
+# Example Output
+The following example shows JavaScript export behaviour:
+
+```haxe
+package libraryTest;
+
+@DecoratorOne({ one: 1 })
+@DecoratorTwo({ two: 2 })
+class ToDecorate
+{
+	public var annotations = [];
+	public var parameters = [];
+	
+	public function new() 
+	{
+		
+	}	
+}
+```
+
+Outputs to:
+```javascript
+var libraryTest_ToDecorate = function() {
+	this.parameters = [];
+	this.annotations = [];
+	libraryTest.TestDecorators.decoratorTwo({ two : 2},libraryTest.TestDecorators.decoratorOne({ one : 1},this));
+};
+```
 *More info:* `src/libraryTest/ToDecorate.hx` and `src/libraryTest/TestDecorators.hx`
