@@ -1,7 +1,7 @@
 # hxdecorate
 Haxe library for creating decorators
 
-__Aims:__
+### Aims
 * Primarily, merge macros and metadata capabilities together to emulate decorators
 * To be multiplatform
 * Building from above, supporting as many Haxe exports as possible with the same config syntax
@@ -12,7 +12,7 @@ __Notes:__
 * Haxelib will be available at some point
 * Test infrastructure will follow shortly
 
-__Supported Platforms:__
+### Supported Platforms
 * JavaScript
 * Python
 
@@ -44,7 +44,7 @@ class Main
 }
 ```
 
-# Example Output
+### Example Output
 The following example shows JavaScript export behaviour:
 
 ```haxe
@@ -61,6 +61,28 @@ class ToDecorate
 	{
 		
 	}	
+}
+
+@:keep
+@:expose
+class TestDecorators
+{
+	private function new() 
+	{
+		
+	}
+	
+	public static function decoratorOne(input : Dynamic, caller : ToDecorate) : ToDecorate
+	{
+		caller.annotations.push(input);
+		return caller;
+	}
+	
+	public static function decoratorTwo(input : Dynamic, caller : ToDecorate) : ToDecorate
+	{
+		caller.parameters.push(input);
+		return caller;
+	}
 }
 ```
 
