@@ -20,6 +20,8 @@ import haxe.macro.Expr;
 import haxe.macro.Expr.Field;
 import haxe.macro.Context;
 import haxe.macro.ExprTools;
+import haxe.macro.Type;
+import haxe.macro.Type.ClassField;
 import haxe.macro.Type.ClassType;
 
 using hxdecorate.ExprExtension;
@@ -28,6 +30,10 @@ class Decorator
 {
 	private static var decorators : Map<String, Dynamic>;
 	private static var initialised : Bool = false;
+	
+	#if macro
+	private static var platformsSupported = ["js", "python"];
+	#end
 	
 	private function new() { }
 
@@ -69,6 +75,28 @@ class Decorator
 		
 		return null;
 	}
+	
+	
+	
+	/**
+	 * Checks whether the referenced function name is
+	 * within the list of static fields.
+	 * @param	classType				The class type to be inspected.
+	 * @param	decoratorFunctionName	The function name to search for in the class type's list of static fields.
+	 * @return	True if [decoratorFunctionName] is contained in list of static fields.
+	 */
+	private static function isStatic(classType : ClassType, decoratorFunctionName : String) : Bool
+	{
+		for (fn in classType.statics.get())
+		{
+			if (fn.name == decoratorFunctionName)
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
 	#end
 	
 	/**
@@ -81,25 +109,85 @@ class Decorator
 		var localClass : ClassType = Context.getLocalClass().get();
 		var localMetadata : Metadata = localClass.meta.get();
 		var newStatement : Expr;
+		var currentPlatform : String;
 		var decoratorStatement : Expr = null;
 		
+		// Detect current platform in macro mode
+		for (define in Context.getDefines().keys())
+		{
+			if (platformsSupported.indexOf(define) > -1)
+			{
+				currentPlatform = define;
+			}
+		}
+					
 		for (meta in localMetadata)
 		{
 			// Add calls to decorator functions
 			if (decorators.exists(meta.name))
 			{
-				if(decoratorStatement == null)
+				var decoratorCall : String = decorators[meta.name];
+				var callComponents : Array<String> = decoratorCall.split('#');
+				var underlyingType : Type = Context.getType(callComponents[0]);
+				// Variable used to store how a programming language
+				// defines a self-owned object (i.e., 'this' in JavaScript)
+				var identSelf : String;
+				
+				if (callComponents.length != 2)
 				{
+					Context.fatalError('Decorator call "${decoratorCall}" must be in the form "fullyQualifiedClasspath#functionName".', Context.currentPos());
+				}
+				
+				// Configure platform-related syntax. If the platform is
+				// unsupported, an exception is thrown.
+				switch(currentPlatform)
+				{
+					case "js":
+						identSelf = "this";
+						
+					case "python":
+						identSelf = "self";
+						// Transform decorator call, Haxe namespaces class names as such:
+						// pack0_packN_className
+						decoratorCall = decoratorCall.split(".").join("_");
+					default:
+						throw "Platform unsupported.";
+				}
+				
+				// Function call preceeded by a '#'
+				decoratorCall = decoratorCall.split("#").join(".");
+				
+				if (underlyingType != null)
+				{
+					var classType = switch(underlyingType)
+					{
+						case TInst(r, _) : r.get();
+						default: null;
+					};
+				
+					// Check the referenced function is static.
+					if (!isStatic(classType, callComponents[1]))
+					{
+						Context.fatalError('Function "${callComponents[1]}" in class "${callComponents[0]}" either does not exist or is not marked as static.', Context.currentPos());
+					}
+				}
+				else
+				{
+					Context.fatalError('Class "${callComponents[0]}" does not exist.', Context.currentPos());
+				}
+				
+				if(decoratorStatement == null)
+				{					
 					// Build initial statement:
 					// functionName(input, caller);
-					decoratorStatement = macro untyped $i { decorators[meta.name] } (untyped $b{meta.params}, this);
+					decoratorStatement = macro untyped $i{decoratorCall}(untyped $b{meta.params}, $i{identSelf});
 				}
 				else
 				{
 					// Apply next decorator function:
 					// functionNameN(input, functionName(input, caller)); // ..etc
 					// functionName returns the caller
-					decoratorStatement = macro untyped $i { decorators[meta.name] } (untyped $b{meta.params}, untyped $e { decoratorStatement } );
+					decoratorStatement = macro untyped $i{decoratorCall}(untyped $b{meta.params}, untyped $e{decoratorStatement});
 				}
 			}
 		}

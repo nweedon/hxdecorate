@@ -1,4 +1,6 @@
 ﻿# JS
-haxe  -debug --each -cp src -js bin/hxdecorate.js -main Main
+haxe -debug --each -cp src -js bin/hxdecorate.js -main Main
+# Python
+haxe -debug --each -cp src -python bin/hxdecorate.py -main Main
 # CPP
 haxe  -cp src -cpp bin -main Main

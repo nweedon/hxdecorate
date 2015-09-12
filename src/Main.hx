@@ -20,8 +20,8 @@ import hxdecorate.Decorator;
 import libraryTest.ConversionTestSuite;
 
 @:build(hxdecorate.Decorator.build({
-	'DecoratorOne' : 'libraryTest.TestDecorators.decoratorOne',
-	'DecoratorTwo' : 'libraryTest.TestDecorators.decoratorTwo'
+	'DecoratorOne' : 'libraryTest.TestDecorators#decoratorOne',
+	'DecoratorTwo' : 'libraryTest.TestDecorators#decoratorTwo'
 }, [
 	"libraryTest.ToDecorate"
 ]))
