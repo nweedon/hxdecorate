@@ -6,7 +6,7 @@ Haxe library for creating decorators
 * To be multiplatform
 * Building from above, supporting as many Haxe exports as possible with the same config syntax
 
-__Notes:__
+### Notes:
 * Very early development: ideas and suggestions are appreciated!
 * This is currently working run-time only, but I'm really wanting to get build-time decorators working too (i.e. adding/modifying/deleting fields etc.)
 * Haxelib will be available at some point
@@ -16,7 +16,7 @@ __Notes:__
 * JavaScript
 * Python
 
-__Use:__
+### Use
 Place on main class.
 
 *Syntax:*
