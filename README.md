@@ -1,5 +1,5 @@
 # hxdecorate
-Haxe library for creating decorators
+[![Build Status](https://travis-ci.org/nweedon/hxdecorate.svg?branch=master)](https://travis-ci.org/nweedon/hxdecorate)
 
 ### Aims
 * Primarily, merge macros and metadata capabilities together to emulate decorators
@@ -10,11 +10,17 @@ Haxe library for creating decorators
 * Very early development: ideas and suggestions are appreciated!
 * This is currently working run-time only, but I'm really wanting to get build-time decorators working too (i.e. adding/modifying/deleting fields etc.)
 * Haxelib will be available at some point
-* Test infrastructure will follow shortly
 
 ### Supported Platforms
-* JavaScript
+* JavaScript (Browser, Node.js, io.js)
 * Python
+* C++
+
+### Extra Supporting Features
+The following build features are added automatically in hxdecorate, to make using the library as easy as possible:
+* :keep
+* :expose
+* :cppInclude
 
 ### Use
 Place on main class.
@@ -63,8 +69,6 @@ class ToDecorate
 	}	
 }
 
-@:keep
-@:expose
 class TestDecorators
 {
 	private function new() 
@@ -91,7 +95,7 @@ Outputs to:
 var libraryTest_ToDecorate = function() {
 	this.parameters = [];
 	this.annotations = [];
-	libraryTest.TestDecorators.decoratorTwo({ two : 2},libraryTest.TestDecorators.decoratorOne({ one : 1},this));
+	$hx_exports.libraryTest.TestDecorators.decoratorTwo({ two : 2},$hx_exports.libraryTest.TestDecorators.decoratorOne({ one : 1},this));
 };
 ```
 *More info:* `src/libraryTest/ToDecorate.hx` and `src/libraryTest/TestDecorators.hx`
