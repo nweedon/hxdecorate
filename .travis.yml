@@ -18,7 +18,7 @@ addons:
     packages:
       - python3.4
 env:
-  - HXDECORATE_PLATFORM=cpp
+  - HXDECORATE_PLATFORM=cpp-linux
   - HXDECORATE_PLATFORM=js
-  - HXDECORATE_PLATFORM=python
+  - HXDECORATE_PLATFORM=python-linux
 script: haxe $HXDECORATE_PLATFORM.hxml
