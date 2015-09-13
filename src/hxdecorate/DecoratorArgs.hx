@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 package hxdecorate;
+import haxe.macro.Compiler;
 
 class DecoratorArgs
 {
@@ -60,19 +61,29 @@ class DecoratorArgs
 	 */
 	public function getPlatformCall() : String
 	{
-		var modifiedCall = switch(Decorator.getCurrentPlatform())
+		var modifiedCall = "";
+		
+		switch(Decorator.getCurrentPlatform())
 		{
 			case "js": 
-				decoratorCall;			
+				modifiedCall = decoratorCall.split("#").join(".");			
 			// Transform decorator call, Haxe namespaces class names as such:
 			// pack0_packN_className
 			case "python": 
-				decoratorCall.split(".").join("_");
+				modifiedCall = decoratorCall.split(".").join("_").split("#").join(".");
+				
+			case "cpp":
+				var namespaces = className.split(".");
+				var obj = namespaces.pop();
+				// Example:
+				// 'libraryTest.TestDecorators#decoratorOne' will become:
+				// ::libraryTest::TestDecorators_obj::decoratorOne(...)
+				modifiedCall = '::${namespaces.join("::")}::${obj}_obj::${functionName}';
 			default: 
-				throw 'Platform "${Decorator.getCurrentPlatform()}" unsupported.';
+				throw 'Platform unsupported.';
 		}
 		
-		modifiedCall = modifiedCall.split("#").join(".");
+		modifiedCall = Platform.globalNamespace() + modifiedCall;
 		
 		return modifiedCall;
 	}

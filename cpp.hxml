@@ -1,0 +1,11 @@
+-cp src 
+-main Main 
+-dce full
+-v
+
+# Build to CPP
+-cpp bin
+
+# Test
+-cmd cd bin
+-cmd Main

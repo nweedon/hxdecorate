@@ -33,7 +33,7 @@ class Decorator
 	private static var currentPlatform;
 	
 	#if macro
-	private static var platformsSupported = ["js", "python"];
+	private static var platformsSupported = ["js", "python", "cpp"];
 	#end
 	
 	private function new() { }
@@ -64,7 +64,17 @@ class Decorator
 	{
 		var decoratorBindings : Dynamic = decoratorClassExpr.value();
 		var classesToDecorate : Array<String> = classesToDecorate.value();
+		var className : String = Context.getLocalClass().toString();
 		
+		// Check build macro is placed on main class
+		var args = Sys.args();
+		var mainClassName = args[args.indexOf("-main") + 1];
+		
+		if (mainClassName != className)
+		{
+			Context.fatalError("'hxdecorator.Decorator.build()' must be placed on the main class.", Context.currentPos());
+		}
+			
 		if (!initialised)
 		{
 			// Detect current platform in macro mode
@@ -142,7 +152,47 @@ class Decorator
 		var constructorField : Field = null;
 		var fieldIndex : Int = 0;
 		var newStatement : Expr;
-					
+		
+		/*
+		 * Step 1:
+		 * 
+		 * Initial run of the local metadata array. This will update the metadata
+		 * list with any extra build-time metadata, such as :cppInclude (which will
+		 * allow C++ builds to include the files which have their decorator definitions)
+		*/
+		for (meta in localMetadata)
+		{
+			if (decorators.exists(meta.name))
+			{
+				var args : DecoratorArgs = decorators[meta.name];
+				
+				switch(getCurrentPlatform())
+				{
+					case "cpp":
+						// Add :cppInclude metadata
+						// Example:
+						// Class Name: libraryTest.TestDecorators
+						// Header File: TestDecorators
+						// Final Path: libraryTest/TestDecorators.h
+						var headerFilePath = args.getClassName().split('.');
+						var headerFileName = headerFilePath.pop();
+						var finalPath = '${headerFilePath.join("/")}/${headerFileName}.h';
+						
+						localClass.meta.add(":cppInclude", 
+											[Context.makeExpr(finalPath, Context.currentPos())], 
+											Context.currentPos());
+				
+					default:		
+				}				
+			}
+		}
+		
+		/*
+		 * Step 2:
+		 * 
+		 * Run through metadata again, but this time process the decorators
+		 * and produce the required macro information.
+		*/
 		for (meta in localMetadata)
 		{
 			// Add calls to decorator functions

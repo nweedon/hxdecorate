@@ -1,0 +1,14 @@
+language: haxe
+haxe:
+  - "3.2.0"
+neko: "2.0.0"
+hxml:
+  - cpp.hxml
+  - js.hxml
+  - python.hxml
+install:
+  - curl https://iojs.org/dist/latest/iojs-v3.3.0-linux-x64.tar.gz > iojs.tar.gz
+  - tar -zxvf iojs.tar.gz
+  - export PATH=$PATH:~/iojs-v3.3.0-linux-x64/bin
+  - chmod +x ~/iojs-v3.3.0-linux-x64/biniojs
+  - iojs -v

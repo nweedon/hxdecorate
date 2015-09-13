@@ -28,5 +28,9 @@ class ConversionTestSuite extends TestCase
 		assertEquals(1, a.annotations.length);
 		assertTrue(Reflect.hasField(a.annotations[0], "one"));
 		assertEquals(1, Reflect.field(a.annotations[0], "one"));
+		
+		assertEquals(1, a.annotations.length);
+		assertTrue(Reflect.hasField(a.parameters[0], "two"));
+		assertEquals(2, Reflect.field(a.parameters[0], "two"));
 	}
 }

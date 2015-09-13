@@ -23,7 +23,7 @@ class Platform
 	}
 
 	/**
-	 * Configures platform-related syntax, in this case, how a programming
+	 * Defines platform-related syntax, in this case, how a programming
 	 * language defines the current object (i.e. 'this' in JavaScript).
 	 * @param	currentPlatform The platform that is currently being compiled for.
 	 * @return
@@ -36,6 +36,46 @@ class Platform
 		{
 			case "js": "this";				
 			case "python": "self";
+			case "cpp": "this";
+			default: throw "Platform unsupported.";
+		}
+	}
+	
+	/**
+	 * Defines the global namespace syntax for the
+	 * current platform.
+	 * @param	asName	Return the namespace variable without the namespace separator.
+	 * @return
+	 */
+	public static function globalNamespace(?asName : Bool = false) : String
+	{
+		var name = switch(Decorator.getCurrentPlatform()) {
+			case "js": "$hx_exports";
+			case "python": "";
+			case "cpp": "";
+			default: throw "Platform unsupported.";
+		}
+		
+		if (!asName && name != "")
+		{
+			name += namespaceSeparator();
+		}
+		
+		return name;
+	}
+	
+	/**
+	 * Defines the namespace separator used in the
+	 * current platform.
+	 * @return
+	 */
+	public static function namespaceSeparator() : String
+	{
+		return switch(Decorator.getCurrentPlatform()) 
+		{
+			case "js": ".";
+			case "python": "_";
+			case "cpp": "::";
 			default: throw "Platform unsupported.";
 		}
 	}
