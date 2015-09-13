@@ -13,26 +13,30 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package libraryTest;
+package hxdecorate;
 
-import libraryTest.ToDecorate;
-
-class TestDecorators
+class Platform
 {
 	private function new() 
 	{
 		
 	}
-	
-	public static function decoratorOne(input : Dynamic, caller : ToDecorate) : ToDecorate
+
+	/**
+	 * Configures platform-related syntax, in this case, how a programming
+	 * language defines the current object (i.e. 'this' in JavaScript).
+	 * @param	currentPlatform The platform that is currently being compiled for.
+	 * @return
+	 */
+	public static function identSelf() : String
 	{
-		caller.annotations.push(input);
-		return caller;
-	}
-	
-	public static function decoratorTwo(input : Dynamic, caller : ToDecorate) : ToDecorate
-	{
-		caller.parameters.push(input);
-		return caller;
+		// Configure platform-related syntax. If the platform is
+		// unsupported, an exception is thrown.
+		return switch(Decorator.getCurrentPlatform())
+		{
+			case "js": "this";				
+			case "python": "self";
+			default: throw "Platform unsupported.";
+		}
 	}
 }

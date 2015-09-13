@@ -28,8 +28,9 @@ using hxdecorate.ExprExtension;
 
 class Decorator
 {
-	private static var decorators : Map<String, Dynamic>;
+	private static var decorators : Map<String, DecoratorArgs>;
 	private static var initialised : Bool = false;
+	private static var currentPlatform;
 	
 	#if macro
 	private static var platformsSupported = ["js", "python"];
@@ -39,8 +40,18 @@ class Decorator
 
 	public static function init()
 	{
-		decorators = new Map<String, Dynamic>();
+		decorators = new Map<String, DecoratorArgs>();		
 		initialised = true;
+	}
+	
+	public static function getCurrentPlatform()
+	{
+		if (!initialised)
+		{
+			throw "Decorator has not been initialised yet, so platform is null!";
+		}
+		
+		return currentPlatform;
 	}
 	
 	/**
@@ -56,6 +67,15 @@ class Decorator
 		
 		if (!initialised)
 		{
+			// Detect current platform in macro mode
+			for (define in Context.getDefines().keys())
+			{
+				if (platformsSupported.indexOf(define) > -1)
+				{
+					currentPlatform = define;
+				}
+			}
+		
 			init();
 		}
 		
@@ -63,20 +83,26 @@ class Decorator
 		{	
 			for (decorator in Reflect.fields(decoratorBindings))
 			{
-				var ident = Reflect.field(decoratorBindings, decorator);
-				decorators.set(decorator, ident);
+				var ident : String = Reflect.field(decoratorBindings, decorator);
+				var args : DecoratorArgs = new DecoratorArgs(ident);
+				
+				// Add to the list of decorators and tell the compiler to
+				// keep the class, so DCE does not get rid of it.
+				decorators.set(decorator, args);
+				CompilerExtension.expose(args.getClassName());
+				Compiler.keep(args.getClassName());
 			}
 			
 			for (cl in classesToDecorate)
 			{
-				Compiler.addMetadata("@:build(hxdecorate.Decorator.decorate())", cl);
+				CompilerExtension.build("hxdecorate.Decorator.decorate()", cl);
+				CompilerExtension.expose(cl);
+				Compiler.keep(cl);
 			}
 		}
 		
 		return null;
 	}
-	
-	
 	
 	/**
 	 * Checks whether the referenced function name is
@@ -87,11 +113,14 @@ class Decorator
 	 */
 	private static function isStatic(classType : ClassType, decoratorFunctionName : String) : Bool
 	{
-		for (fn in classType.statics.get())
+		if (classType != null && decoratorFunctionName != null && decoratorFunctionName.length > 0)
 		{
-			if (fn.name == decoratorFunctionName)
+			for (fn in classType.statics.get())
 			{
-				return true;
+				if (fn.name == decoratorFunctionName)
+				{
+					return true;
+				}
 			}
 		}
 		
@@ -108,54 +137,20 @@ class Decorator
 		var buildFields : Array<Field> = Context.getBuildFields();
 		var localClass : ClassType = Context.getLocalClass().get();
 		var localMetadata : Metadata = localClass.meta.get();
-		var newStatement : Expr;
-		var currentPlatform : String;
+		var originalBlock : Array<Expr> = [];
 		var decoratorStatement : Expr = null;
-		
-		// Detect current platform in macro mode
-		for (define in Context.getDefines().keys())
-		{
-			if (platformsSupported.indexOf(define) > -1)
-			{
-				currentPlatform = define;
-			}
-		}
+		var constructorField : Field = null;
+		var fieldIndex : Int = 0;
+		var newStatement : Expr;
 					
 		for (meta in localMetadata)
 		{
 			// Add calls to decorator functions
 			if (decorators.exists(meta.name))
 			{
-				var decoratorCall : String = decorators[meta.name];
-				var callComponents : Array<String> = decoratorCall.split('#');
-				var underlyingType : Type = Context.getType(callComponents[0]);
-				// Variable used to store how a programming language
-				// defines a self-owned object (i.e., 'this' in JavaScript)
-				var identSelf : String;
-				
-				if (callComponents.length != 2)
-				{
-					Context.fatalError('Decorator call "${decoratorCall}" must be in the form "fullyQualifiedClasspath#functionName".', Context.currentPos());
-				}
-				
-				// Configure platform-related syntax. If the platform is
-				// unsupported, an exception is thrown.
-				switch(currentPlatform)
-				{
-					case "js":
-						identSelf = "this";
-						
-					case "python":
-						identSelf = "self";
-						// Transform decorator call, Haxe namespaces class names as such:
-						// pack0_packN_className
-						decoratorCall = decoratorCall.split(".").join("_");
-					default:
-						throw "Platform unsupported.";
-				}
-				
-				// Function call preceeded by a '#'
-				decoratorCall = decoratorCall.split("#").join(".");
+				var args : DecoratorArgs = decorators[meta.name];
+				var decoratorCall : String = args.getPlatformCall();
+				var underlyingType : Type = Context.getType(args.getClassName());
 				
 				if (underlyingType != null)
 				{
@@ -166,21 +161,22 @@ class Decorator
 					};
 				
 					// Check the referenced function is static.
-					if (!isStatic(classType, callComponents[1]))
+					if (!isStatic(classType, args.getFunctionName()))
 					{
-						Context.fatalError('Function "${callComponents[1]}" in class "${callComponents[0]}" either does not exist or is not marked as static.', Context.currentPos());
+						Context.fatalError('Function "${args.getFunctionName()}" in class "${args.getClassName()}" either does not exist or is not marked as static.', Context.currentPos());
 					}
 				}
 				else
 				{
-					Context.fatalError('Class "${callComponents[0]}" does not exist.', Context.currentPos());
+					Context.fatalError('Class "${args.getClassName()}" does not exist.', Context.currentPos());
 				}
 				
+				// Compile final build statement.
 				if(decoratorStatement == null)
 				{					
 					// Build initial statement:
 					// functionName(input, caller);
-					decoratorStatement = macro untyped $i{decoratorCall}(untyped $b{meta.params}, $i{identSelf});
+					decoratorStatement = macro untyped $i{decoratorCall}(untyped $b{meta.params}, $i{Platform.identSelf()});
 				}
 				else
 				{
@@ -192,40 +188,35 @@ class Decorator
 			}
 		}
 		
-		var fieldIndex = 0;
-		
-		for (i in 0...buildFields.length)
+		// Search for constructor field.
+		while (fieldIndex < buildFields.length && originalBlock != null)
 		{
-			if (buildFields[i].name == "new")
+			if (buildFields[fieldIndex].name == "new")
 			{
-				fieldIndex = i;
-			}
-		}
-		
-		var constructorField : Field = buildFields[fieldIndex];
-		var originalBlock : Array<Expr>;
-		
-		if (constructorField != null)
-		{
-			// Retrieve main function.
-			var func : haxe.macro.Expr.Function = switch(constructorField.kind)
-			{
-				case FFun(f): f;
-				default: null;
-			};
-			
-			// Retrieve original code block. If an original
-			// doesn't exist, create an empty block.
-			originalBlock = switch(func.expr.expr)
-			{
-				case EBlock(b): b;
-				default: [];
+				// Retrieve main function.
+				var func : haxe.macro.Expr.Function = switch(buildFields[fieldIndex].kind)
+				{
+					case FFun(f): f;
+					default: null;
+				};
+				
+				// Retrieve original code block. If an original
+				// doesn't exist, create an empty block.
+				originalBlock = switch(func.expr.expr)
+				{
+					case EBlock(b): b;
+					default: [];
+				}
+				
+				// Remove old constructor
+				buildFields.splice(fieldIndex, 1);
 			}
 			
-			// Remove old constructor
-			buildFields.splice(fieldIndex, 1);
+			fieldIndex++;
 		}
 		
+		// Add new constructor which has the new
+		// decorator statement.
 		buildFields.push({
 			name: "new",
 			doc: null,
