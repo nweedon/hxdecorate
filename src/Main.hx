@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,20 +18,29 @@ package;
 import haxe.unit.TestRunner;
 import hxdecorate.Decorator;
 import libraryTest.ConversionTestSuite;
+import libraryTest.DecorateBeforeTestSuite;
+import libraryTest.NonExistentMetadataTestSuite;
 
 @:build(hxdecorate.Decorator.build({
-	'DecoratorOne' : 'libraryTest.TestDecorators#decoratorOne',
-	'DecoratorTwo' : 'libraryTest.TestDecorators#decoratorTwo'
+    'DecoratorOne' : 'libraryTest.TestDecorators#decoratorOne',
+    'DecoratorTwo' : 'libraryTest.TestDecorators#decoratorTwo',
+    'BDecoratorOne' : 'libraryTest.TestDecoratorsBuildMetadata#decoratorOne',
+    'BDecoratorTwo' : 'libraryTest.TestDecoratorsBuildMetadata#decoratorTwo'
 }, [
-	"libraryTest.ToDecorate"
+    "libraryTest.ToDecorate",
+    "libraryTest.ToDecorateBuildMetadata",
+    "libraryTest.ToDecorateWithMetadata",
+    "libraryTest.NonExistentMetadata"
 ]))
-class Main 
-{	
-	static function main() 
-	{
-		var runner : TestRunner = new TestRunner();
-		runner.add(new ConversionTestSuite());
-		
-		runner.run();
-	}
+class Main {
+
+    static function main() {
+        var runner : TestRunner = new TestRunner();
+        runner.add(new ConversionTestSuite());
+        runner.add(new DecorateBeforeTestSuite());
+        runner.add(new NonExistentMetadataTestSuite());
+
+        runner.run();
+    }
+
 }

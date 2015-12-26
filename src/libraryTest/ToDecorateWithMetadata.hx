@@ -14,14 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 package libraryTest;
+import libraryTest.ToDecorate;
 
 @DecoratorOne({ one: 1 })
 @DecoratorTwo({ two: 2 })
-class ToDecorate {
+@:decorateBefore
+class ToDecorateWithMetadata extends ToDecorate {
 
-    public var annotations = [];
-    public var parameters = [];
-
-    public function new() { }
+    public function new() {
+        super();
+        annotations = [];
+    }
 
 }

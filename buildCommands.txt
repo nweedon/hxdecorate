@@ -1,6 +1,0 @@
-﻿# JS
-haxe -debug --each -cp src -js bin/hxdecorate.js -main Main -dce full
-# Python
-haxe -debug --each -cp src -python bin/hxdecorate.py -main Main -dce full
-# CPP
-haxe  -cp src -cpp bin -main Main -dce full

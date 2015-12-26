@@ -1,12 +1,10 @@
--cp src 
--main Main 
+-cp src
+-main Main
 -dce full
 -v
 
 # Build to CPP
--cpp bin
+-cpp bin/cpp
 
 # Test
--cmd cd bin
--cmd chmod +x Main
--cmd ./Main
+-cmd cd bin/cpp && chmod +x Main && ./Main

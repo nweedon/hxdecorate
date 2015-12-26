@@ -15,13 +15,14 @@ limitations under the License.
 */
 package libraryTest;
 
-@DecoratorOne({ one: 1 })
-@DecoratorTwo({ two: 2 })
-class ToDecorate {
+import haxe.unit.TestCase;
+import libraryTest.NonExistentMetadata;
 
-    public var annotations = [];
-    public var parameters = [];
+class NonExistentMetadataTestSuite extends TestCase {
 
-    public function new() { }
+    public function testIgnoresMetadata() {
+        var a : NonExistentMetadata = new NonExistentMetadata();
+        assertEquals(Reflect.fields(a).length, 0);
+    }
 
 }

@@ -11,10 +11,21 @@
 * This is currently working run-time only, but I'm really wanting to get build-time decorators working too (i.e. adding/modifying/deleting fields etc.)
 * Haxelib will be available at some point
 
-### Supported Platforms
-* JavaScript (Browser, Node.js, io.js)
-* Python
-* C++
+### Supported Targets
+
+| Platform | Supported |
+| -------- | :-------: |
+| AS3      | |
+| C++      | ✔ |
+| C#       | |
+| ES5      | ✔ |
+| Flash    | |
+| io.js    | ✔ |
+| Java     | |
+| Neko     | |
+| Node.js  | ✔ |
+| PHP      | |
+| Python   | ✔ |
 
 ### Extra Supporting Features
 The following build features are added automatically in hxdecorate, to make using the library as easy as possible:
@@ -62,26 +73,26 @@ class ToDecorate
 {
 	public var annotations = [];
 	public var parameters = [];
-	
-	public function new() 
+
+	public function new()
 	{
-		
-	}	
+
+	}
 }
 
 class TestDecorators
 {
-	private function new() 
+	private function new()
 	{
-		
+
 	}
-	
+
 	public static function decoratorOne(input : Dynamic, caller : ToDecorate) : ToDecorate
 	{
 		caller.annotations.push(input);
 		return caller;
 	}
-	
+
 	public static function decoratorTwo(input : Dynamic, caller : ToDecorate) : ToDecorate
 	{
 		caller.parameters.push(input);

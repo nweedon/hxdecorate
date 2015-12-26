@@ -15,13 +15,18 @@ limitations under the License.
 */
 package libraryTest;
 
-@DecoratorOne({ one: 1 })
-@DecoratorTwo({ two: 2 })
-class ToDecorate {
+import haxe.unit.TestCase;
+import libraryTest.ToDecorateWithMetadata;
+import libraryTest.TestDecorators;
 
-    public var annotations = [];
-    public var parameters = [];
+class DecorateBeforeTestSuite extends TestCase {
 
-    public function new() { }
+    public function testBuildEffect() {
+        var a : ToDecorateWithMetadata = new ToDecorateWithMetadata();
+        // As the @:decorateBefore metadata is attached to
+        // the ToDecorateWithMetadata class, the annotations
+        // array should be cleared.
+        assertEquals(0, a.annotations.length);
+    }
 
 }

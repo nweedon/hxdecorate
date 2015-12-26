@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,18 +19,29 @@ import haxe.unit.TestCase;
 import libraryTest.ToDecorate;
 import libraryTest.TestDecorators;
 
-class ConversionTestSuite extends TestCase
-{
-	public function testConversion()
-	{
-		var a : ToDecorate = new ToDecorate();
-		
-		assertEquals(1, a.annotations.length);
-		assertTrue(Reflect.hasField(a.annotations[0], "one"));
-		assertEquals(1, Reflect.field(a.annotations[0], "one"));
-		
-		assertEquals(1, a.annotations.length);
-		assertTrue(Reflect.hasField(a.parameters[0], "two"));
-		assertEquals(2, Reflect.field(a.parameters[0], "two"));
-	}
+class ConversionTestSuite extends TestCase {
+
+    public function testConversion() {
+        var a : ToDecorate = new ToDecorate();
+
+        assertEquals(1, a.annotations.length);
+        assertTrue(Reflect.hasField(a.annotations[0], "one"));
+        assertEquals(1, Reflect.field(a.annotations[0], "one"));
+
+        assertEquals(1, a.annotations.length);
+        assertTrue(Reflect.hasField(a.parameters[0], "two"));
+        assertEquals(2, Reflect.field(a.parameters[0], "two"));
+    }
+
+    public function testConversionBuildMetadata() {
+        var a : ToDecorateBuildMetadata = new ToDecorateBuildMetadata();
+        
+        assertEquals(1, a.annotations.length);
+        assertTrue(Reflect.hasField(a.annotations[0], "one"));
+        assertEquals(1, Reflect.field(a.annotations[0], "one"));
+
+        assertEquals(1, a.annotations.length);
+        assertTrue(Reflect.hasField(a.parameters[0], "two"));
+        assertEquals(2, Reflect.field(a.parameters[0], "two"));
+    }
 }

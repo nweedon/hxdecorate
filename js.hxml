@@ -1,11 +1,11 @@
---each 
--cp src 
--main Main 
+--each
+-cp src
+-main Main
 -dce full
 -v
 
 # Build to JavaScript
--js bin/hxdecorate.js
+-js bin/js/hxdecorate.js
 
-# Test via Node.js
--cmd node bin/hxdecorate.js
+# Test via Node.js and io.js
+-cmd node bin/js/hxdecorate.js && iojs bin/js/hxdecorate.js

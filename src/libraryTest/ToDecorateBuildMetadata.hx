@@ -15,9 +15,9 @@ limitations under the License.
 */
 package libraryTest;
 
-@DecoratorOne({ one: 1 })
-@DecoratorTwo({ two: 2 })
-class ToDecorate {
+@:BDecoratorOne({ one: 1 })
+@:BDecoratorTwo({ two: 2 })
+class ToDecorateBuildMetadata {
 
     public var annotations = [];
     public var parameters = [];
