@@ -45,4 +45,18 @@ class ConversionTestSuite extends TestCase {
         assertTrue(Reflect.hasField(a.parameters[0], "two"));
         assertEquals(2, Reflect.field(a.parameters[0], "two"));
     }
+
+    public function testAssignToNonConstructor() {
+        var a : ToDecorate = new ToDecorate();
+        var thrown : Bool = false;
+
+        try {
+            a.notConstructor();
+        } catch(e : String) {
+            assertEquals('Not implemented!', e);
+            thrown = true;
+        }
+
+        assertTrue(thrown);
+    }
 }

@@ -18,8 +18,6 @@ package test.classes;
 @DoesNotExist
 class NonExistentMetadata {
 
-    public function new() {
-
-    }
+    public function new() { }
 
 }

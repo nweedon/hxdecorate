@@ -25,7 +25,8 @@ import test.NonExistentMetadataTestSuite;
     'DecoratorOne' : 'test.decorators.TestDecorators#decoratorOne',
     'DecoratorTwo' : 'test.decorators.TestDecorators#decoratorTwo',
     'BDecoratorOne' : 'test.decorators.TestDecoratorsBuildMetadata#decoratorOne',
-    'BDecoratorTwo' : 'test.decorators.TestDecoratorsBuildMetadata#decoratorTwo'
+    'BDecoratorTwo' : 'test.decorators.TestDecoratorsBuildMetadata#decoratorTwo',
+    'NotImplemented' : 'test.decorators.NotImplemented#impl'
 }, [
     "test.classes.ToDecorate",
     "test.classes.ToDecorateBuildMetadata",

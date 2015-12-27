@@ -15,13 +15,13 @@ limitations under the License.
 */
 package test.classes;
 
-@:BDecoratorOne({ one: 1 })
-@:BDecoratorTwo({ two: 2 })
 class ToDecorateBuildMetadata {
 
     public var annotations = [];
     public var parameters = [];
 
+    @:BDecoratorOne({ one: 1 })
+    @:BDecoratorTwo({ two: 2 })
     public function new() { }
 
 }

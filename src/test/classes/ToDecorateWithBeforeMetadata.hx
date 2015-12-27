@@ -17,11 +17,11 @@ package test.classes;
 
 import test.classes.ToDecorate;
 
-@DecoratorOne({ one: 1 })
-@DecoratorTwo({ two: 2 })
-@:decorateBefore
 class ToDecorateWithBeforeMetadata extends ToDecorate {
 
+    @DecoratorOne({ one: 1 })
+    @DecoratorTwo({ two: 2 })
+    @:decorateBefore
     public function new() {
         super();
         annotations = [];

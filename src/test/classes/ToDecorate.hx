@@ -15,13 +15,16 @@ limitations under the License.
 */
 package test.classes;
 
-@DecoratorOne({ one: 1 })
-@DecoratorTwo({ two: 2 })
 class ToDecorate {
 
     public var annotations : Array<Dynamic> = [1];
     public var parameters : Array<Dynamic> = [1];
 
+    @DecoratorOne({ one: 1 })
+    @DecoratorTwo({ two: 2 })
     public function new() { }
 
+    @:NotImplemented
+    @:decorateBefore
+    public function notConstructor() { }
 }
