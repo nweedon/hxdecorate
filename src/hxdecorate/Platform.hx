@@ -32,6 +32,7 @@ class Platform {
             case "js": "this";
             case "python": "self";
             case "cpp": "this";
+            case "java": "this";
             default: throw "Platform unsupported.";
         }
     }
@@ -47,6 +48,7 @@ class Platform {
             case "js": "$hx_exports";
             case "python": "";
             case "cpp": "";
+            case "java": "";
             default: throw "Platform unsupported.";
         }
 
@@ -67,6 +69,7 @@ class Platform {
             case "js": ".";
             case "python": "_";
             case "cpp": "::";
+            case "java": ".";
             default: throw "Platform unsupported.";
         }
     }

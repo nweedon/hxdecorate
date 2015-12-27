@@ -74,6 +74,9 @@ class DecoratorArgs {
                 // ::libraryTest::TestDecorators_obj::decoratorOne(...)
                 modifiedCall = '::${namespaces.join("::")}::${obj}_obj::${functionName}';
 
+            case "java":
+                modifiedCall = decoratorCall.split("#").join(".");
+
             default:
                 throw 'Platform unsupported.';
         }

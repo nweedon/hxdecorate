@@ -13,15 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package libraryTest;
+package test;
 
-@DecoratorOne({ one: 1 })
-@DecoratorTwo({ two: 2 })
-class ToDecorate {
+import haxe.unit.TestCase;
+import test.classes.NonExistentMetadata;
 
-    public var annotations = [];
-    public var parameters = [];
+class NonExistentMetadataTestSuite extends TestCase {
 
-    public function new() { }
+    public function testIgnoresMetadata() {
+        var a : NonExistentMetadata = new NonExistentMetadata();
+        assertEquals(Reflect.fields(a).length, 0);
+    }
 
 }

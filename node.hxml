@@ -8,4 +8,4 @@
 -js bin/js/hxdecorate.js
 
 # Test via Node.js and io.js
--cmd node bin/js/hxdecorate.js && iojs bin/js/hxdecorate.js
+-cmd node bin/js/hxdecorate.js

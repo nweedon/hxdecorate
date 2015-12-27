@@ -33,7 +33,7 @@ class Decorator {
     private static var currentPlatform;
 
     #if macro
-    private static var platformsSupported = ["js", "python", "cpp"];
+    private static var platformsSupported = ["js", "python", "cpp", "java"];
     #end
 
     private function new() { }
@@ -146,9 +146,10 @@ class Decorator {
         var originalBlock : Array<Expr> = [];
         var finalBlock : Expr;
         var decoratorStatement : Expr = null;
+        var decoratorStatementIdentifier : String = null;
+        var params : Array<Dynamic> = [];
         var constructorField : Field = null;
         var fieldIndex : Int = 0;
-        var newStatement : Expr;
         var decorateBefore : Bool = shouldDecorateBefore(localMetadata);
 
         /*
@@ -159,7 +160,7 @@ class Decorator {
         * allow C++ builds to include the files which have their decorator definitions)
         */
         for (meta in localMetadata) {
-            var name = meta.name;
+            var name : String = meta.name;
 
             // Remove ':' from metadata (for comparison only)
             if(meta.name.charAt(0) == ':') {
@@ -173,12 +174,10 @@ class Decorator {
                     case "cpp":
                         // Add :cppInclude metadata
                         // Example:
-                        // Class Name: libraryTest.TestDecorators
+                        // Class Name: test.decorators.TestDecorators
                         // Header File: TestDecorators
-                        // Final Path: libraryTest/TestDecorators.h
-                        var headerFilePath = args.getClassName().split('.');
-                        var headerFileName = headerFilePath.pop();
-                        var finalPath = '${headerFilePath.join("/")}/${headerFileName}.h';
+                        // Final Path: test/decorators/TestDecorators.h
+                        var finalPath : String = '${args.getClassName().split('.').join("/")}.h';
 
                         localClass.meta.add(":cppInclude",
                             [Context.makeExpr(finalPath, Context.currentPos())],
@@ -195,8 +194,10 @@ class Decorator {
         * Run through metadata again, but this time process the decorators
         * and produce the required macro information.
         */
+        var metaIndex : Int = 0;
+
         for (meta in localMetadata) {
-            var name = meta.name;
+            var name : String = meta.name;
 
             // Remove ':' from metadata (for comparison only)
             if(meta.name.charAt(0) == ':') {
@@ -224,22 +225,65 @@ class Decorator {
                 }
 
                 // Compile final build statement.
-                if(decoratorStatement == null) {
-                    // Build initial statement:
-                    // functionName(input, caller);
-                    decoratorStatement = macro untyped $i{decoratorCall}(untyped $b{meta.params}, $i{Platform.identSelf()});
-                } else {
-                    // Apply next decorator function:
-                    // functionNameN(input, functionName(input, caller)); // ..etc
-                    // functionName returns the caller
-                    decoratorStatement = macro untyped $i{decoratorCall}(untyped $b{meta.params}, untyped $e{decoratorStatement});
+                switch(getCurrentPlatform()) {
+                    case "java":
+                        // For Java, manually build the code. As hxjava adds
+                        // __hxinvoke2_o to all function calls, the code needs to
+                        // be built in a different way (as the above doesn't work).
+                        var param = null;
+
+                        if(decoratorStatementIdentifier == null) {
+                            decoratorStatementIdentifier = '${decoratorCall}(';
+
+                            // '__params_n' is defined in the final code block
+                            // deifnition. Each param variable in the Java code
+                            // corresponds to a parameter value in meta.params.
+                            for(param in meta.params) {
+                                params.push(ExprExtension.value(param));
+                                decoratorStatementIdentifier += '__params_${metaIndex},';
+                            }
+
+                            // '__self' is defined in the final code block
+                            // definition. It points the the variable hxjava
+                            // gives 'this' in the static constructor function.
+                            decoratorStatementIdentifier += '__self)';
+                        } else {
+                            var addedStatement : String = '${decoratorCall}(';
+
+                            for(param in meta.params) {
+                                params.push(ExprExtension.value(param));
+                                addedStatement += '__params_${metaIndex},';
+                            }
+
+                            decoratorStatementIdentifier = '${addedStatement}${decoratorStatementIdentifier})';
+                        }
+
+                    default:
+                        // For every other target, use expressions.
+                        if(decoratorStatement == null) {
+                            // Build initial statement:
+                            // functionName(input, caller);
+                            decoratorStatement = macro untyped $i{ decoratorCall }(untyped $b{ meta.params }, $i{ Platform.identSelf() });
+                        } else {
+                            // Apply next decorator function:
+                            // functionNameN(input, functionName(input, caller)); // ..etc
+                            // functionName returns the caller
+                            decoratorStatement = macro untyped $i{ decoratorCall }(untyped $b{ meta.params }, untyped $e{ decoratorStatement });
+                        }
                 }
+
+                metaIndex++;
             }
         }
 
-        // Only update build fields if the target
-        // has at least one decorator.
-        if(decoratorStatement != null) {
+        /*
+         * Step 3:
+         *
+         * Regenerate constructor with new code body.
+         * Only update build fields if the target has at
+         * least one decorator.
+        */
+        if(decoratorStatement != null || decoratorStatementIdentifier != null) {
             // Search for constructor field.
             while (fieldIndex < buildFields.length && originalBlock != null) {
                 if (buildFields[fieldIndex].name == "new") {
@@ -270,15 +314,44 @@ class Decorator {
                 fieldIndex++;
             }
 
-            if(decorateBefore) {
-                finalBlock = macro {
-                    $decoratorStatement;
-                    $b{ originalBlock }
+            if(decoratorStatement != null) {
+                // Generate final code block. With 'decorateBefore' set,
+                // the calls to the decorator functions are placed before
+                // the rest of the constructor code.
+                if(decorateBefore) {
+                    finalBlock = macro {
+                        $decoratorStatement;
+                        $b{ originalBlock }
+                    }
+                } else {
+                    finalBlock = macro {
+                        $b{ originalBlock }
+                        $decoratorStatement;
+                    }
+                }
+            } else if(decoratorStatementIdentifier != null) {
+                // Generate final code block. This is mainly the same as
+                // using the 'decoratorStatement' expression above, except this
+                // time the code is generated in a String, so use it as an
+                // identifier.
+                if(decorateBefore) {
+                    finalBlock = macro {
+                        var __self = this;
+                        var __params : Array<Dynamic> = $v{ params }
+                        untyped $i{ decoratorStatementIdentifier };
+                        $b{ originalBlock }
+                    }
+                } else {
+                    finalBlock = macro {
+                        var __self = this;
+                        var __params : Array<Dynamic> = $v{ params }
+                        $b{ originalBlock }
+                        untyped $i{ decoratorStatementIdentifier };
+                    }
                 }
             } else {
                 finalBlock = macro {
-                    $b{ originalBlock }
-                    $decoratorStatement;
+                    $b{ originalBlock };
                 }
             }
 
@@ -287,7 +360,7 @@ class Decorator {
             // earlier.
             if(localClass.superClass != null) {
                 finalBlock = macro {
-                    $i{ "super" }();
+                    super();
                     $e{ finalBlock }
                 }
             }

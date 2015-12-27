@@ -1,10 +1,13 @@
 language: haxe
 haxe:
   - "3.2.0"
+  - "3.2.1"
 neko: "2.0.0"
 install:
-  - sh -c "if [ '$TARGET' = 'cpp' ]; then ./travis/cpp-setup.sh; fi"
-  - sh -c "if [ '$TARGET' = 'node' ]; then ./travis/node-setup.sh; fi"
+  - chmod +x ./travis/*.sh
+  - sh -c "if [ '$HXDECORATE_PLATFORM' = 'cpp' ]; then; ./travis/cpp-setup.sh; fi"
+  - sh -c "if [ '$HXDECORATE_PLATFORM' = 'node' ] || [ '$HXDECORATE_PLATFORM' = 'iojs' ]; then; ./travis/node-setup.sh; fi"
+  - sh -c "if [ '$HXDECORATE_PLATFORM' = 'java' ]; then; ./travis/java-setup.sh; fi"
 addons:
   apt:
     sources:
@@ -12,7 +15,9 @@ addons:
     packages:
       - python3.4
 env:
-  - HXDECORATE_PLATFORM=cpp-linux
-  - HXDECORATE_PLATFORM=js
-  - HXDECORATE_PLATFORM=python-linux
+  - HXDECORATE_PLATFORM=cpp
+  - HXDECORATE_PLATFORM=node
+  - HXDECORATE_PLATFORM=iojs
+  - HXDECORATE_PLATFORM=python
+  - HXDECORATE_PLATFORM=java
 script: haxe $HXDECORATE_PLATFORM.hxml

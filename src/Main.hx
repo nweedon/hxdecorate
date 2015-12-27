@@ -17,20 +17,21 @@ package;
 
 import haxe.unit.TestRunner;
 import hxdecorate.Decorator;
-import libraryTest.ConversionTestSuite;
-import libraryTest.DecorateBeforeTestSuite;
-import libraryTest.NonExistentMetadataTestSuite;
+import test.ConversionTestSuite;
+import test.DecorateBeforeTestSuite;
+import test.NonExistentMetadataTestSuite;
 
 @:build(hxdecorate.Decorator.build({
-    'DecoratorOne' : 'libraryTest.TestDecorators#decoratorOne',
-    'DecoratorTwo' : 'libraryTest.TestDecorators#decoratorTwo',
-    'BDecoratorOne' : 'libraryTest.TestDecoratorsBuildMetadata#decoratorOne',
-    'BDecoratorTwo' : 'libraryTest.TestDecoratorsBuildMetadata#decoratorTwo'
+    'DecoratorOne' : 'test.decorators.TestDecorators#decoratorOne',
+    'DecoratorTwo' : 'test.decorators.TestDecorators#decoratorTwo',
+    'BDecoratorOne' : 'test.decorators.TestDecoratorsBuildMetadata#decoratorOne',
+    'BDecoratorTwo' : 'test.decorators.TestDecoratorsBuildMetadata#decoratorTwo'
 }, [
-    "libraryTest.ToDecorate",
-    "libraryTest.ToDecorateBuildMetadata",
-    "libraryTest.ToDecorateWithMetadata",
-    "libraryTest.NonExistentMetadata"
+    "test.classes.ToDecorate",
+    "test.classes.ToDecorateBuildMetadata",
+    "test.classes.ToDecorateWithBeforeMetadata",
+    "test.classes.ToDecorateWithoutBeforeMetadata",
+    "test.classes.NonExistentMetadata"
 ]))
 class Main {
 

@@ -13,17 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package libraryTest;
-import libraryTest.ToDecorate;
+package test.classes;
 
-@DecoratorOne({ one: 1 })
-@DecoratorTwo({ two: 2 })
-@:decorateBefore
-class ToDecorateWithMetadata extends ToDecorate {
+@:BDecoratorOne({ one: 1 })
+@:BDecoratorTwo({ two: 2 })
+class ToDecorateBuildMetadata {
 
-    public function new() {
-        super();
-        annotations = [];
-    }
+    public var annotations = [];
+    public var parameters = [];
+
+    public function new() { }
 
 }

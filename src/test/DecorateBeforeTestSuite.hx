@@ -13,20 +13,28 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package libraryTest;
+package test;
 
 import haxe.unit.TestCase;
-import libraryTest.ToDecorateWithMetadata;
-import libraryTest.TestDecorators;
+import test.classes.ToDecorateWithBeforeMetadata;
+import test.classes.ToDecorateWithoutBeforeMetadata;
+import test.decorators.TestDecorators;
 
 class DecorateBeforeTestSuite extends TestCase {
 
     public function testBuildEffect() {
-        var a : ToDecorateWithMetadata = new ToDecorateWithMetadata();
+        var with : ToDecorateWithBeforeMetadata = new ToDecorateWithBeforeMetadata();
+        var without : ToDecorateWithoutBeforeMetadata = new ToDecorateWithoutBeforeMetadata();
         // As the @:decorateBefore metadata is attached to
         // the ToDecorateWithMetadata class, the annotations
         // array should be cleared.
-        assertEquals(0, a.annotations.length);
+        assertEquals(0, with.annotations.length);
+        // Without the @:decorateBefore metadata, the 'annotations'
+        // array will:
+        // 1. Be set with one entry (ToDecorate.hx), then
+        // 2. Then cleared (ToDecorateWithoutBeforeMetadata.hx:26)
+        // 3. Updated by the decorator (TestDecorators.hx)
+        assertEquals(1, without.annotations.length);
     }
 
 }

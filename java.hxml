@@ -4,7 +4,7 @@
 -v
 
 # Build to CPP
--cpp bin/cpp
+-java bin/java
 
 # Test
--cmd cd bin/cpp && chmod +x Main && ./Main
+-cmd java -jar bin/java/Main.jar

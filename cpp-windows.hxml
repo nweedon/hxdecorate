@@ -7,4 +7,4 @@
 -cpp bin/cpp
 
 # Test
--cmd cd bin/cpp && chmod +x Main && ./Main
+-cmd bin\cpp\Main.exe

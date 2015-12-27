@@ -21,7 +21,7 @@
 | ES5      | ✔ |
 | Flash    | |
 | io.js    | ✔ |
-| Java     | |
+| Java     | ✔ |
 | Neko     | |
 | Node.js  | ✔ |
 | PHP      | |

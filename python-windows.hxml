@@ -8,4 +8,4 @@
 -python bin/python/hxdecorate.py
 
 # Test
--cmd python3.4 bin/python/hxdecorate.py
+-cmd python bin/python/hxdecorate.py

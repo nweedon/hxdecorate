@@ -13,14 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package libraryTest;
+package test.classes;
 
-@:BDecoratorOne({ one: 1 })
-@:BDecoratorTwo({ two: 2 })
-class ToDecorateBuildMetadata {
+@DecoratorOne({ one: 1 })
+@DecoratorTwo({ two: 2 })
+class ToDecorate {
 
-    public var annotations = [];
-    public var parameters = [];
+    public var annotations : Array<Dynamic> = [1];
+    public var parameters : Array<Dynamic> = [1];
 
     public function new() { }
 
