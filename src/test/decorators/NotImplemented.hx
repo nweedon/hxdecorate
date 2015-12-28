@@ -19,7 +19,7 @@ class NotImplemented {
 
     private function new() { }
 
-    public static function impl(input : Dynamic, caller : Dynamic) : Dynamic {
+    public static function impl(input : Array<Dynamic>, caller : Dynamic) : Dynamic {
         throw('Not implemented!');
         return caller;
     }

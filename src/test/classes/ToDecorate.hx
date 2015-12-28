@@ -20,7 +20,7 @@ class ToDecorate {
     public var annotations : Array<Dynamic> = [1];
     public var parameters : Array<Dynamic> = [1];
 
-    @DecoratorOne({ one: 1 })
+    @DecoratorOne({ one: 1 }, "ignored")
     @DecoratorTwo({ two: 2 })
     public function new() { }
 

@@ -151,7 +151,6 @@ class Decorator {
         for(field in buildFields) {
             var decorateBefore : Bool = shouldDecorateBefore(field.meta);
             var originalBlock : Array<Expr> = [];       // Original code block to be modified.
-            var finalBlock : Expr;                      // Final block of code (expression) after macro modification.
             var fieldIndex : Int = 0;
             var metaIndex : Int = 0;
 
@@ -252,52 +251,27 @@ class Decorator {
                     // Compile final build statement.
                     switch(getCurrentPlatform()) {
                         case "java":
-                            // For Java, manually build the code. As hxjava adds
-                            // __hxinvoke2_o to all function calls, the code needs to
-                            // be built in a different way (as the above doesn't work).
-                            var param = null;
+                            var metaParams : Array<Dynamic> = [];
 
-                            if(decoratorStatementIdentifier == null) {
-                                decoratorStatementIdentifier = '${decoratorCall}(';
-
-                                // '__params_n' is defined in the final code block
-                                // deifnition. Each param variable in the Java code
-                                // corresponds to a parameter value in meta.params.
-                                for(param in meta.params) {
-                                    params.push(ExprExtension.value(param));
-                                    decoratorStatementIdentifier += '__params_${metaIndex},';
-                                }
-
-                                // '__self' is defined in the final code block
-                                // definition. It points the the variable hxjava
-                                // gives 'this' in the static constructor function.
-                                decoratorStatementIdentifier += '__self)';
-                            } else {
-                                var addedStatement : String = '${decoratorCall}(';
-
-                                for(param in meta.params) {
-                                    params.push(ExprExtension.value(param));
-                                    addedStatement += '__params_${metaIndex},';
-                                }
-
-                                decoratorStatementIdentifier = '${addedStatement}${decoratorStatementIdentifier})';
+                            for(param in meta.params) {
+                                metaParams.push(param.value());
                             }
+
+                            decoratorStatementIdentifier = JavaCodeGenerator.generateDecorator(decoratorStatementIdentifier, decoratorCall, metaParams);
 
                         default:
                             // For every other target, use expressions.
                             if(decoratorStatement == null) {
                                 // Build initial statement:
                                 // functionName(input, caller);
-                                decoratorStatement = macro untyped $i{ decoratorCall }(untyped $b{ meta.params }, $i{ Platform.identSelf() });
+                                decoratorStatement = macro untyped $i{ decoratorCall }($a{ meta.params }, $i{ Platform.identSelf() });
                             } else {
                                 // Apply next decorator function:
                                 // functionNameN(input, functionName(input, caller)); // ..etc
                                 // functionName returns the caller
-                                decoratorStatement = macro untyped $i{ decoratorCall }(untyped $b{ meta.params }, untyped $e{ decoratorStatement });
+                                decoratorStatement = macro untyped $i{ decoratorCall }($a{ meta.params }, $e{ decoratorStatement });
                             }
                     }
-
-                    metaIndex++;
                 }
             }
 
@@ -309,6 +283,8 @@ class Decorator {
              * least one decorator.
             */
             if(decoratorStatement != null || decoratorStatementIdentifier != null) {
+                var decoratorLines : Array<Expr> = [];
+
                 // Retrieve original code block. If an original
                 // doesn't exist, create an empty block.
                 originalBlock = switch(fieldDef.expr.expr) {
@@ -324,57 +300,34 @@ class Decorator {
                 }
 
                 if(decoratorStatement != null) {
-                    // Generate final code block. With 'decorateBefore' set,
-                    // the calls to the decorator functions are placed before
-                    // the rest of the constructor code.
-                    if(decorateBefore) {
-                        finalBlock = macro {
-                            $decoratorStatement;
-                            $b{ originalBlock }
-                        }
-                    } else {
-                        finalBlock = macro {
-                            $b{ originalBlock }
-                            $decoratorStatement;
-                        }
-                    }
+                    decoratorLines.push(macro untyped ${ decoratorStatement });
                 } else if(decoratorStatementIdentifier != null) {
                     // Generate final code block. This is mainly the same as
                     // using the 'decoratorStatement' expression above, except this
                     // time the code is generated in a String, so use it as an
                     // identifier.
-                    if(decorateBefore) {
-                        finalBlock = macro {
-                            var __self = this;
-                            var __params : Array<Dynamic> = $v{ params }
-                            untyped $i{ decoratorStatementIdentifier };
-                            $b{ originalBlock }
-                        }
-                    } else {
-                        finalBlock = macro {
-                            var __self = this;
-                            var __params : Array<Dynamic> = $v{ params }
-                            $b{ originalBlock }
-                            untyped $i{ decoratorStatementIdentifier };
-                        }
-                    }
+                    var selfName = JavaCodeGenerator.SELF_REFERENCE_VARIABLE_NAME;
+
+                    decoratorLines.push(macro var $selfName = this);
+                    decoratorLines.push(macro var __params : Array<Dynamic> = $v{ JavaCodeGenerator.getParams() });
+                    decoratorLines.push(macro untyped $i{ decoratorStatementIdentifier });
+                }
+
+                if(decorateBefore) {
+                    decoratorLines.push(macro $b{ originalBlock });
                 } else {
-                    finalBlock = macro {
-                        $b{ originalBlock };
-                    }
+                    decoratorLines.insert(0, macro $b{ originalBlock });
                 }
 
                 // If local class has a superclass,
                 // insert supercall as it was removed
                 // earlier.
                 if(field.name == "new" && localClass.superClass != null) {
-                    finalBlock = macro {
-                        super();
-                        $e{ finalBlock }
-                    }
+                    decoratorLines.insert(0, macro super());
                 }
 
-                fieldDef.expr = finalBlock;
+                // Set new function body
+                fieldDef.expr = macro $b{ decoratorLines };
                 field.kind = FieldType.FFun(fieldDef);
             }
 

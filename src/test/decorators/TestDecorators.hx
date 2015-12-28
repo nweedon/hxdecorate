@@ -21,13 +21,13 @@ class TestDecorators {
 
     private function new() { }
 
-    public static function decoratorOne(input : Dynamic, caller : ToDecorate) : ToDecorate {
-        caller.annotations.push(input);
+    public static function decoratorOne(input : Array<Dynamic>, caller : ToDecorate) : ToDecorate {
+        caller.annotations.push(input[0]);
         return caller;
     }
 
-    public static function decoratorTwo(input : Dynamic, caller : ToDecorate) : ToDecorate {
-        caller.parameters.push(input);
+    public static function decoratorTwo(input : Array<Dynamic>, caller : ToDecorate) : ToDecorate {
+        caller.parameters.push(input[0]);
         return caller;
     }
 

@@ -21,13 +21,13 @@ class TestDecoratorsBuildMetadata {
 
     private function new() { }
 
-    public static function decoratorOne(input : Dynamic, caller : ToDecorateBuildMetadata) : ToDecorateBuildMetadata {
-        caller.annotations.push(input);
+    public static function decoratorOne(input : Array<Dynamic>, caller : ToDecorateBuildMetadata) : ToDecorateBuildMetadata {
+        caller.annotations.push(input[0]);
         return caller;
     }
 
-    public static function decoratorTwo(input : Dynamic, caller : ToDecorateBuildMetadata) : ToDecorateBuildMetadata {
-        caller.parameters.push(input);
+    public static function decoratorTwo(input : Array<Dynamic>, caller : ToDecorateBuildMetadata) : ToDecorateBuildMetadata {
+        caller.parameters.push(input[0]);
         return caller;
     }
 
