@@ -3,6 +3,8 @@ haxe:
   - "3.2.0"
   - "3.2.1"
 neko: "2.0.0"
+before_install:
+  - java install oraclejdk8
 install:
   - chmod +x ./travis/*.sh
   - sh -c "if [ '$HXDECORATE_PLATFORM' = 'cpp' ]; then; ./travis/cpp-setup.sh; fi"

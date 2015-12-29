@@ -15,6 +15,7 @@ limitations under the License.
 */
 package hxdecorate;
 
+#if macro
 import haxe.macro.Expr;
 
 @:dce
@@ -83,3 +84,4 @@ class ExprExtension {
     }
 
 }
+#end

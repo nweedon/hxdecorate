@@ -15,6 +15,7 @@ limitations under the License.
 */
 package hxdecorate;
 
+#if macro
 class Platform {
 
     private function new() { }
@@ -75,3 +76,4 @@ class Platform {
     }
 
 }
+#end

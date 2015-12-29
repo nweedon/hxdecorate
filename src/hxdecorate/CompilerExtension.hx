@@ -15,6 +15,7 @@ limitations under the License.
 */
 package hxdecorate;
 
+#if macro
 import haxe.macro.Compiler;
 
 class CompilerExtension {
@@ -39,5 +40,6 @@ class CompilerExtension {
             Compiler.addMetadata('@:build(${buildSyntax})', className);
         }
     }
-    
+
 }
+#end

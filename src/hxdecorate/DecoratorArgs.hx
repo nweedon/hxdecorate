@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 package hxdecorate;
+
+#if macro
 import haxe.macro.Compiler;
 
 class DecoratorArgs {
@@ -86,3 +88,4 @@ class DecoratorArgs {
     }
 
 }
+#end

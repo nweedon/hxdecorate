@@ -15,6 +15,7 @@ limitations under the License.
 */
 package hxdecorate;
 
+#if macro
 import haxe.macro.Compiler;
 import haxe.macro.Expr;
 import haxe.macro.Expr.Field;
@@ -32,9 +33,7 @@ class Decorator {
     private static var initialised : Bool = false;
     private static var currentPlatform;
 
-    #if macro
     private static var platformsSupported = ["js", "python", "cpp", "java"];
-    #end
 
     private function new() { }
 
@@ -56,7 +55,6 @@ class Decorator {
     * @param	decoratorClassExpr
     * @return
     */
-    #if macro
     macro public static function build(decoratorClassExpr : Expr, classesToDecorate : Expr) : Array<Field> {
         var decoratorBindings : Dynamic = decoratorClassExpr.value();
         var classesToDecorate : Array<String> = classesToDecorate.value();
@@ -133,7 +131,21 @@ class Decorator {
 
         return false;
     }
-    #end
+
+    private static function generateDefaultDecorator(decoratorStatement : Expr, decoratorCall : String, metaParams : Array<Expr>) : Expr {
+        if(decoratorStatement == null) {
+            // Build initial statement:
+            // functionName(input, caller);
+            decoratorStatement = macro untyped $i{ decoratorCall }($a{ metaParams }, $i{ Platform.identSelf() });
+        } else {
+            // Apply next decorator function:
+            // functionNameN(input, functionName(input, caller)); // ..etc
+            // functionName returns the caller
+            decoratorStatement = macro untyped $i{ decoratorCall }($a{ metaParams }, $e{ decoratorStatement });
+        }
+
+        return decoratorStatement;
+    }
 
     /**
     * Apply decorator generation code.
@@ -145,7 +157,6 @@ class Decorator {
         var field : Field = null;                                       // Current field being analysed.
         var localClass : ClassType = Context.getLocalClass().get();     // Current class being analysed.
         var currentPlatform : String = getCurrentPlatform();            // The Haxe target platform.
-        var headersIncluded : Array<String> = [];
         var cppIncludeStatement : String = "";
 
         for(field in buildFields) {
@@ -182,37 +193,7 @@ class Decorator {
             * list with any extra build-time metadata, such as :cppInclude (which will
             * allow C++ builds to include the files which have their decorator definitions)
             */
-            // Quick skip if platform is not affected
-            if(["cpp"].indexOf(currentPlatform) >= 0) {
-                for (meta in field.meta) {
-                    var name : String = meta.name;
-
-                    // Remove ':' from metadata (for comparison only)
-                    if(meta.name.charAt(0) == ':') {
-                        name = meta.name.substr(1);
-                    }
-
-                    if (decorators.exists(name)) {
-                        var args : DecoratorArgs = decorators[name];
-
-                        switch(currentPlatform) {
-                            case "cpp":
-                                // Add :cppInclude metadata
-                                // Example:
-                                // Class Name: test.decorators.TestDecorators
-                                // Header File: TestDecorators
-                                // Final Path: test/decorators/TestDecorators.h
-                                var headerFile : String = '${args.getClassName().split('.').join("/")}.h';
-
-                                if(headersIncluded.indexOf(headerFile) < 0) {
-                                    cppIncludeStatement += '#include "${headerFile}"\n';
-                                    headersIncluded.push(headerFile);
-                                }
-                            default:
-                        }
-                    }
-                }
-            }
+            CppCodeGenerator.generateInclude(decorators, field);
 
             /*
             * Step 2:
@@ -251,26 +232,18 @@ class Decorator {
                     // Compile final build statement.
                     switch(getCurrentPlatform()) {
                         case "java":
-                            var metaParams : Array<Dynamic> = [];
-
-                            for(param in meta.params) {
-                                metaParams.push(param.value());
-                            }
-
-                            decoratorStatementIdentifier = JavaCodeGenerator.generateDecorator(decoratorStatementIdentifier, decoratorCall, metaParams);
+                            decoratorStatementIdentifier =
+                                JavaCodeGenerator.generateDecorator(decoratorStatementIdentifier,
+                                                                    decoratorCall,
+                                                                    meta.params.map(function(param : Expr) {
+                                                                        return param.value();
+                                                                    }));
 
                         default:
                             // For every other target, use expressions.
-                            if(decoratorStatement == null) {
-                                // Build initial statement:
-                                // functionName(input, caller);
-                                decoratorStatement = macro untyped $i{ decoratorCall }($a{ meta.params }, $i{ Platform.identSelf() });
-                            } else {
-                                // Apply next decorator function:
-                                // functionNameN(input, functionName(input, caller)); // ..etc
-                                // functionName returns the caller
-                                decoratorStatement = macro untyped $i{ decoratorCall }($a{ meta.params }, $e{ decoratorStatement });
-                            }
+                            decoratorStatement = generateDefaultDecorator(decoratorStatement,
+                                                                            decoratorCall,
+                                                                            meta.params);
                     }
                 }
             }
@@ -334,14 +307,10 @@ class Decorator {
             updatedBuildFields.push(field);
         }
 
-        // Workaround for multi-header includes.
-        if(currentPlatform == "cpp" && cppIncludeStatement != "") {
-            localClass.meta.add(":cppFileCode",
-                [Context.makeExpr(cppIncludeStatement, Context.currentPos())],
-                Context.currentPos());
-        }
+        CppCodeGenerator.addFileCode(localClass);
 
         return updatedBuildFields;
     }
 
 }
+#end

@@ -15,6 +15,7 @@ limitations under the License.
 */
 package hxdecorate;
 
+#if macro
 class JavaCodeGenerator {
 
     private static inline var DECORATOR_CALL_TAG = "%DECORATOR_CALL%";
@@ -76,3 +77,4 @@ class JavaCodeGenerator {
     }
 
 }
+#end
