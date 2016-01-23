@@ -14,10 +14,16 @@
 # limitations under the License.
 set -e
 
+cd /tmp
+
 curl https://iojs.org/dist/v3.3.0/iojs-v3.3.0-linux-x64.tar.gz > iojs.tar.gz
-tar -zxvf iojs.tar.gz -C ~
-export PATH=$PATH:~/iojs-v3.3.0-linux-x64/bin
-chmod +x ~/iojs-v3.3.0-linux-x64/bin/iojs
-chmod +x ~/iojs-v3.3.0-linux-x64/bin/node
+tar -zxvf iojs.tar.gz -C /tmp
+
+ls -l /tmp
+ls -l /tmp/iojs-v3.3.0-linux-x64/bin
+
+export PATH=$PATH:/tmp/iojs-v3.3.0-linux-x64/bin
+chmod +x /tmp/iojs-v3.3.0-linux-x64/bin/iojs
+chmod +x /tmp/iojs-v3.3.0-linux-x64/bin/node
 iojs -v
 node -v
