@@ -65,7 +65,7 @@ class Decorator {
         var mainClassName = args[args.indexOf("-main") + 1];
 
         if (mainClassName != className) {
-            Context.fatalError("'hxdecorator.Decorator.build()' must be placed on the main class.", Context.currentPos());
+            Context.fatalError('"hxdecorate.Decorator.build()" must be placed on the main class.', Context.currentPos());
         }
 
         if (!initialised) {
@@ -82,6 +82,7 @@ class Decorator {
         if (decoratorBindings != null) {
             for (decorator in Reflect.fields(decoratorBindings)) {
                 var ident : String = Reflect.field(decoratorBindings, decorator);
+                trace('Creating decorator binding for "${ident}"');
                 var args : DecoratorArgs = new DecoratorArgs(ident);
 
                 // Add to the list of decorators and tell the compiler to
@@ -92,6 +93,7 @@ class Decorator {
             }
 
             for (cl in classesToDecorate) {
+                trace('Preparing "${cl}" for building');
                 CompilerExtension.build("hxdecorate.Decorator.decorate()", cl);
                 CompilerExtension.expose(cl);
                 Compiler.keep(cl);
@@ -99,25 +101,6 @@ class Decorator {
         }
 
         return null;
-    }
-
-    /**
-    * Checks whether the referenced function name is
-    * within the list of static fields.
-    * @param	classType				The class type to be inspected.
-    * @param	decoratorFunctionName	The function name to search for in the class type's list of static fields.
-    * @return	True if [decoratorFunctionName] is contained in list of static fields.
-    */
-    private static function isStatic(classType : ClassType, decoratorFunctionName : String) : Bool {
-        if (classType != null && decoratorFunctionName != null && decoratorFunctionName.length > 0) {
-            for (fn in classType.statics.get()) {
-                if (fn.name == decoratorFunctionName) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
     public static function shouldDecorateBefore(classMetadata : Metadata) : Bool {
@@ -156,14 +139,13 @@ class Decorator {
         var updatedBuildFields : Array<Field> = [];                     // Output fields after build macro usage.
         var field : Field = null;                                       // Current field being analysed.
         var localClass : ClassType = Context.getLocalClass().get();     // Current class being analysed.
-        var currentPlatform : String = getCurrentPlatform();            // The Haxe target platform.
-        var cppIncludeStatement : String = "";
+
+        trace('Decorating "${localClass.name}"');
 
         for(field in buildFields) {
             var decorateBefore : Bool = shouldDecorateBefore(field.meta);
             var originalBlock : Array<Expr> = [];       // Original code block to be modified.
-            var fieldIndex : Int = 0;
-            var metaIndex : Int = 0;
+            var meta : Metadata = null;
 
             // Variables used to store the decorator statement which will be written
             // to the current field. In most cases, 'decoratorStatement' will be used,
@@ -173,6 +155,7 @@ class Decorator {
             var decoratorStatement : Expr = null;
             var decoratorStatementIdentifier : String = null;
             var params : Array<Dynamic> = [];
+            var fieldMetadata = field.meta;
 
             // Retrieve field definition.
             // Currently, only support functions.
@@ -201,7 +184,13 @@ class Decorator {
             * Run through metadata again, but this time process the decorators
             * and produce the required macro information.
             */
-            for (meta in field.meta) {
+            if(field.name == "new") {
+                for(classMeta in localClass.meta.get()) {
+                    fieldMetadata.push(classMeta);
+                }
+            }
+
+            for (meta in fieldMetadata) {
                 var name : String = meta.name;
 
                 // Remove ':' from metadata (for comparison only)
@@ -213,21 +202,8 @@ class Decorator {
                 if (decorators.exists(name)) {
                     var args : DecoratorArgs = decorators[name];
                     var decoratorCall : String = args.getPlatformCall();
-                    var underlyingType : Type = Context.getType(args.getClassName());
 
-                    if (underlyingType != null) {
-                        var classType = switch(underlyingType) {
-                            case TInst(r, _) : r.get();
-                            default: null;
-                        };
-
-                        // Check the referenced function is static.
-                        if (!isStatic(classType, args.getFunctionName())) {
-                            Context.fatalError('Function "${args.getFunctionName()}" in class "${args.getClassName()}" either does not exist or is not marked as static.', Context.currentPos());
-                        }
-                    } else {
-                        Context.fatalError('Class "${args.getClassName()}" does not exist.', Context.currentPos());
-                    }
+                    args.checkDecoratorValidity();
 
                     // Compile final build statement.
                     switch(getCurrentPlatform()) {

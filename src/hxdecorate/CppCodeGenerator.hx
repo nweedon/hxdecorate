@@ -23,7 +23,7 @@ import haxe.macro.Type.ClassType;
 
 class CppCodeGenerator {
 
-    public static var includeStatement(default, null) : String = "";
+    private static var includeStatement : String = "";
     private static var headersIncluded : Array<String> = [];
 
     public static function generateInclude(decorators : Map<String, DecoratorArgs>, field : Field) {

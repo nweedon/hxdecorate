@@ -17,12 +17,16 @@ package hxdecorate;
 
 #if macro
 import haxe.macro.Compiler;
+import haxe.macro.Context;
+import haxe.macro.Type;
+import haxe.macro.Type.ClassType;
 
 class DecoratorArgs {
 
     private var className : String;
     private var functionName : String;
     private var decoratorCall : String;
+    private var alreadyCheckedDecorator : Bool;
 
     /**
     * DecoratorArg constructor. Verifies call syntax and
@@ -40,6 +44,7 @@ class DecoratorArgs {
             this.decoratorCall = call;
             this.className = callComponents[0];
             this.functionName = callComponents[1];
+            this.alreadyCheckedDecorator = false;
         }
     }
 
@@ -73,7 +78,7 @@ class DecoratorArgs {
                 var obj = namespaces.pop();
                 // Example:
                 // 'libraryTest.TestDecorators#decoratorOne' will become:
-                // ::libraryTest::TestDecorators_obj::decoratorOne(...)
+                // ::test::decorators::TestDecorators_obj::decoratorOne(...)
                 modifiedCall = '::${namespaces.join("::")}::${obj}_obj::${functionName}';
 
             case "java":
@@ -87,5 +92,51 @@ class DecoratorArgs {
         return modifiedCall;
     }
 
+    /**
+    * Checks whether following decorator information is valid:
+    * Class name exists, function name exists, function is static.
+    *
+    * Throws a compiler fatal error if any of the checks fail.
+    */
+    public function checkDecoratorValidity() {
+        if(!alreadyCheckedDecorator) {
+            var underlyingType : Type = Context.getType(this.className);
+
+            if (underlyingType != null) {
+                var classType = switch(underlyingType) {
+                    case TInst(r, _) : r.get();
+                    default: null;
+                };
+
+                // Check the referenced function is static.
+                if (!isStatic(classType, this.functionName)) {
+                    Context.fatalError('Function "${this.functionName}" in class "${this.className}" either does not exist or is not marked as static.', Context.currentPos());
+                }
+            } else {
+                Context.fatalError('Class "${this.className}" does not exist.', Context.currentPos());
+            }
+
+            alreadyCheckedDecorator = true;
+        }
+    }
+
+    /**
+    * Checks whether the referenced function name is
+    * within the list of static fields.
+    * @param	classType				The class type to be inspected.
+    * @param	decoratorFunctionName	The function name to search for in the class type's list of static fields.
+    * @return	True if [decoratorFunctionName] is contained in list of static fields.
+    */
+    private static function isStatic(classType : ClassType, decoratorFunctionName : String) : Bool {
+        if (classType != null && decoratorFunctionName != null && decoratorFunctionName.length > 0) {
+            for (fn in classType.statics.get()) {
+                if (fn.name == decoratorFunctionName) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }
 #end

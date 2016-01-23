@@ -1,0 +1,11 @@
+--each
+-cp ../src
+-main test.Main
+-dce full
+-v
+
+# Build to Python
+-python ../bin/python/hxdecorate.py
+
+# Test
+-cmd python ../bin/python/hxdecorate.py

@@ -17,6 +17,7 @@ package test;
 
 import haxe.unit.TestCase;
 import test.classes.ToDecorate;
+import test.classes.ToDecorateOnClass;
 import test.classes.ToDecorateBuildMetadata;
 import test.decorators.TestDecorators;
 
@@ -44,6 +45,18 @@ class ConversionTestSuite extends TestCase {
         assertEquals(1, a.annotations.length);
         assertTrue(Reflect.hasField(a.parameters[0], "two"));
         assertEquals(2, Reflect.field(a.parameters[0], "two"));
+    }
+
+    public function testConversionOnClass() {
+        var a : ToDecorateOnClass = new ToDecorateOnClass();
+
+        assertEquals(3, a.annotations.length);
+        assertTrue(Reflect.hasField(a.annotations[2], "one"));
+        assertEquals(1, Reflect.field(a.annotations[2], "one"));
+
+        assertEquals(3, a.parameters.length);
+        assertTrue(Reflect.hasField(a.parameters[2], "two"));
+        assertEquals(2, Reflect.field(a.parameters[2], "two"));
     }
 
     public function testAssignToNonConstructor() {

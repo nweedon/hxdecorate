@@ -7,9 +7,9 @@ before_install:
   - java install oraclejdk8
 install:
   - chmod +x ./travis/*.sh
-  - sh -c "if [ '$HXDECORATE_PLATFORM' = 'cpp' ]; then; ./travis/cpp-setup.sh; fi"
-  - sh -c "if [ '$HXDECORATE_PLATFORM' = 'node' ] || [ '$HXDECORATE_PLATFORM' = 'iojs' ]; then; ./travis/node-setup.sh; fi"
-  - sh -c "if [ '$HXDECORATE_PLATFORM' = 'java' ]; then; ./travis/java-setup.sh; fi"
+  - sh -c "if [ '$HXDECORATE_PLATFORM' = 'cpp' ]; then; ./travis/setup/cpp-setup.sh; fi"
+  - sh -c "if [ '$HXDECORATE_PLATFORM' = 'node' ] || [ '$HXDECORATE_PLATFORM' = 'iojs' ]; then; ./travis/setup/node-setup.sh; fi"
+  - sh -c "if [ '$HXDECORATE_PLATFORM' = 'java' ]; then; ./travis/setup/java-setup.sh; fi"
 addons:
   apt:
     sources:
@@ -22,4 +22,4 @@ env:
   - HXDECORATE_PLATFORM=iojs
   - HXDECORATE_PLATFORM=python
   - HXDECORATE_PLATFORM=java
-script: haxe $HXDECORATE_PLATFORM.hxml
+script: cd travis && haxe $HXDECORATE_PLATFORM.hxml

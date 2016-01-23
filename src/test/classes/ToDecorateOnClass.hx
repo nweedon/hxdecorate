@@ -15,10 +15,12 @@ limitations under the License.
 */
 package test.classes;
 
-@DoesNotExist
-@:DoesNotExistBuild
-class NonExistentMetadata {
+@:DecoratorOne({ one: 1 }, "ignored")
+@:DecoratorTwo({ two: 2 })
+class ToDecorateOnClass extends ToDecorate {
 
-    public function new() { }
+    public function new() {
+        super();
+    }
 
 }
