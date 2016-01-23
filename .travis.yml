@@ -4,9 +4,9 @@ haxe:
   - "3.2.1"
 neko: "2.0.0"
 install:
-  - sh -c "if [ '$HXDECORATE_PLATFORM' = 'cpp' ]; then; chmod +x ./travis/setup/cpp-setup.sh; ./travis/setup/cpp-setup.sh; fi"
-  - sh -c "if [ '$HXDECORATE_PLATFORM' = 'node' ] || [ '$HXDECORATE_PLATFORM' = 'iojs' ]; then; chmod +x ./travis/setup/node-setup.sh; ./travis/setup/node-setup.sh; fi"
-  - sh -c "if [ '$HXDECORATE_PLATFORM' = 'java' ]; then; chmod +x ./travis/setup/java-setup.sh; ./travis/setup/java-setup.sh; fi"
+  - sh -c "if [ '$HXDECORATE_PLATFORM' = 'cpp' ]; then chmod +x ./travis/setup/cpp-setup.sh && ./travis/setup/cpp-setup.sh; fi"
+  - sh -c "if [ '$HXDECORATE_PLATFORM' = 'node' ] || [ '$HXDECORATE_PLATFORM' = 'iojs' ]; then chmod +x ./travis/setup/node-setup.sh && ./travis/setup/node-setup.sh; fi"
+  - sh -c "if [ '$HXDECORATE_PLATFORM' = 'java' ]; then chmod +x ./travis/setup/java-setup.sh && ./travis/setup/java-setup.sh; fi"
 addons:
   apt:
     sources:
