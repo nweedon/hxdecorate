@@ -20,7 +20,6 @@
 | C#       | |
 | ES5      | ✔ |
 | Flash    | |
-| io.js    | ✔ |
 | Java     | ✔ |
 | Neko     | |
 | Node.js  | ✔ |

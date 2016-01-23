@@ -4,9 +4,8 @@ haxe:
   - "3.2.1"
 neko: "2.0.0"
 install:
-  - /bin/bash -c "if [ '${HXDECORATE_PLATFORM}' = 'cpp' ]; then chmod +x ${TRAVIS_BUILD_DIR}/travis/setup/cpp-setup.sh && source ${TRAVIS_BUILD_DIR}/travis/setup/cpp-setup.sh; fi"
-  - /bin/bash -c "if [ '${HXDECORATE_PLATFORM}' = 'node' ] || [ '${HXDECORATE_PLATFORM}' = 'iojs' ]; then chmod +x ${TRAVIS_BUILD_DIR}/travis/setup/node-setup.sh && source ${TRAVIS_BUILD_DIR}/travis/setup/node-setup.sh; fi"
-  - /bin/bash -c "if [ '${HXDECORATE_PLATFORM}' = 'java' ]; then chmod +x ${TRAVIS_BUILD_DIR}/travis/setup/java-setup.sh && source ${TRAVIS_BUILD_DIR}/travis/setup/java-setup.sh; fi"
+  - export SETUP_SCRIPT=${TRAVIS_BUILD_DIR}/travis/setup/${HXDECORATE_PLATFORM}-setup.sh
+  - /bin/bash -c "if [ -e ${SETUP_SCRIPT} ]; then chmod +x ${SETUP_SCRIPT} && source ${SETUP_SCRIPT}; fi"
 addons:
   apt:
     sources:
@@ -16,7 +15,6 @@ addons:
 env:
   - HXDECORATE_PLATFORM=cpp
   - HXDECORATE_PLATFORM=node
-  - HXDECORATE_PLATFORM=iojs
   - HXDECORATE_PLATFORM=python
   - HXDECORATE_PLATFORM=java
 script: cd ${TRAVIS_BUILD_DIR}/travis && haxe ${HXDECORATE_PLATFORM}.hxml
