@@ -1,10 +1,10 @@
--cp ../src
+-cp ${TRAVIS_BUILD_DIR}/src
 -main test.Main
 -dce full
 -v
 
 # Build to CPP
--cpp ../bin/cpp
+-cpp ${TRAVIS_BUILD_DIR}/bin/cpp
 
 # Test
--cmd cd ../bin/cpp && chmod +x Main && ./Main
+-cmd chmod +x ${TRAVIS_BUILD_DIR}/bin/cpp/Main && ${TRAVIS_BUILD_DIR}/bin/cpp/Main
