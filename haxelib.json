@@ -1,0 +1,12 @@
+{
+    "name" : "hxdecorate",
+    "url" : "https://github.com/nweedon/hxdecorate",
+    "license" : "Apache",
+    "tags" : ["decorator", "syntactic", "syntax", "sugar", "language" , "bindings", "cpp", "python", "js", "javascript", "java"],
+    "description" : "Haxe library for creating decorators",
+    "version" : "1.0.0",
+    "classPath" : "src",
+    "releasenote" : "Initial release of hxdecorate library. Supports JavaScript, C++, Java and Python.",
+    "contributors" : ["nweedon"],
+    "dependencies" : { }
+}

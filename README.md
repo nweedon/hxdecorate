@@ -1,5 +1,9 @@
 # hxdecorate
 [![Build Status](https://travis-ci.org/nweedon/hxdecorate.svg?branch=master)](https://travis-ci.org/nweedon/hxdecorate)
+[![Haxelib](https://img.shields.io/github/tag/nweedon/hxdecorate.svg?style=flat&label=haxelib)](http://lib.haxe.org/p/hxdecorate/)
+
+### Installation
+`haxelib install hxdecorate 1.0.0`
 
 ### Aims
 * Primarily, merge macros and metadata capabilities together to emulate decorators
