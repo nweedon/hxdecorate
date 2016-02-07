@@ -4,9 +4,9 @@
     "license" : "Apache",
     "tags" : ["decorator", "syntactic", "syntax", "sugar", "language" , "bindings", "cpp", "python", "js", "javascript", "java"],
     "description" : "Haxe library for creating decorators",
-    "version" : "1.0.0",
+    "version" : "1.1.0",
     "classPath" : "src",
-    "releasenote" : "Initial release of hxdecorate library. Supports JavaScript, C++, Java and Python.",
+    "releasenote" : "Allow proxying of decorator process through another build macro.",
     "contributors" : ["nweedon"],
     "dependencies" : { }
 }

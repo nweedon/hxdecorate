@@ -3,7 +3,7 @@
 [![Haxelib](https://img.shields.io/github/tag/nweedon/hxdecorate.svg?style=flat&label=haxelib)](http://lib.haxe.org/p/hxdecorate/)
 
 ### Installation
-`haxelib install hxdecorate 1.0.0`
+`haxelib install hxdecorate 1.1.0`
 
 ### Aims
 * Primarily, merge macros and metadata capabilities together to emulate decorators
@@ -63,6 +63,8 @@ class Main
   // ...
 }
 ```
+
+The decorator process can also be proxied through another build macro. See `src/test/MainProxy.hx` for an example.
 
 ### Example Output
 The following example shows JavaScript export behaviour:
