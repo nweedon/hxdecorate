@@ -1,0 +1,11 @@
+--each
+-cp ../../src
+-main test.MainProxy
+-dce full
+-v
+
+# Build to Python
+-python ../../bin/python-proxy/hxdecorate.py
+
+# Test
+-cmd python ../../bin/python-proxy/hxdecorate.py

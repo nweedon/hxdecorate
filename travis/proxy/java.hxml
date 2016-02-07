@@ -1,0 +1,10 @@
+-cp ../../src
+-main test.MainProxy
+-dce full
+-v
+
+# Build to CPP
+-java ../../bin/java-proxy
+
+# Test
+-cmd java -jar ../../bin/java-proxy/MainProxy.jar

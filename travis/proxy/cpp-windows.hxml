@@ -1,0 +1,10 @@
+-cp ../../src
+-main test.MainProxy
+-dce full
+-v
+
+# Build to CPP
+-cpp ../../bin/cpp-proxy
+
+# Test
+-cmd ..\..\bin\cpp-proxy\MainProxy.exe

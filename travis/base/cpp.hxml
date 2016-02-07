@@ -1,0 +1,10 @@
+-cp ../../src
+-main test.Main
+-dce full
+-v
+
+# Build to CPP
+-cpp ../../bin/cpp
+
+# Test
+-cmd chmod +x ../../bin/cpp/Main && ../../bin/cpp/Main

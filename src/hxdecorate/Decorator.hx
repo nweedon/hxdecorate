@@ -51,23 +51,26 @@ class Decorator {
     }
 
     /**
-    * Sets up build to parse decorator values.
-    * @param	decoratorClassExpr
-    * @return
+    * Sets up build to parse decorator values. Proxies the build process to allow another
+    * build macro to set up decorators.
+    * @param	decoratorBindings {Dynamic} Decorator bindings object.
+    * @param    classesToDecorate {Array<String>} Array of strings to fully-qualified class names to be decorated.
+    * @return null. Adds no extra build fields to main class.
     */
-    macro public static function build(decoratorClassExpr : Expr, classesToDecorate : Expr) : Array<Field> {
-        var decoratorBindings : Dynamic = decoratorClassExpr.value();
-        var classesToDecorate : Array<String> = classesToDecorate.value();
-        var className : String = Context.getLocalClass().toString();
+    public static function proxyBuild(decoratorBindings : Dynamic, classesToDecorate : Array<String>) : Array<Field> {
+        trace('Proxying decorator process');
+        buildProcess(decoratorBindings, classesToDecorate);
 
-        // Check build macro is placed on main class
-        var args = Sys.args();
-        var mainClassName = args[args.indexOf("-main") + 1];
+        return null;
+    }
 
-        if (mainClassName != className) {
-            Context.fatalError('"hxdecorate.Decorator.build()" must be placed on the main class.', Context.currentPos());
-        }
-
+    /**
+    * Sets up build to parse decorator values.
+    * @param	decoratorBindings {Dynamic} Decorator bindings object.
+    * @param    classesToDecorate {Array<String>} Array of strings to fully-qualified class names to be decorated.
+    * @return null. Adds no extra build fields to main class.
+    */
+    private static function buildProcess(decoratorBindings : Dynamic, classesToDecorate : Array<String>) : Array<Field> {
         if (!initialised) {
             // Detect current platform in macro mode
             for (define in Context.getDefines().keys()) {
@@ -99,6 +102,31 @@ class Decorator {
                 Compiler.keep(cl);
             }
         }
+
+        return null;
+    }
+
+    /**
+    * Sets up build to parse decorator values. Function to use when
+    * building from the main class.
+    * @param	decoratorClassExpr {Expr} Decorator bindings expression.
+    * @param    classesToDecorate {Expr} Expression representing an array of strings to fully-qualified class names.
+    * @return null. Adds no extra build fields to main class.
+    */
+    macro public static function build(decoratorClassExpr : Expr, classesToDecorate : Expr) : Array<Field> {
+        var decoratorBindings : Dynamic = decoratorClassExpr.value();
+        var classesToDecorate : Array<String> = classesToDecorate.value();
+        var className : String = Context.getLocalClass().toString();
+
+        // Check build macro is placed on main class
+        var args = Sys.args();
+        var mainClassName = args[args.indexOf("-main") + 1];
+
+        if (mainClassName != className) {
+            Context.fatalError('"hxdecorate.Decorator.build()" must be placed on the main class.', Context.currentPos());
+        }
+
+        buildProcess(decoratorBindings, classesToDecorate);
 
         return null;
     }
